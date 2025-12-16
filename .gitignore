@@ -1,0 +1,34 @@
+# Images
+*.png
+*.jpg
+
+# Text files
+*.txt
+
+# Model and data files
+*.pt
+*.npz
+*.pth
+*.mat
+*.ckpt
+
+# Video files
+*.mp4
+
+# Archive files
+*.zip
+
+# macOS
+._.DS_Store
+.DS_Store
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Dataset folder (large data)
+dataset/
+
+# Result folder (generated outputs)
+result/
