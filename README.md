@@ -120,6 +120,73 @@ LSV-Loc/
 └── result/                   # Training outputs and checkpoints
 ```
 
+## Dataset Structure
+The dataset should be organized under `dataset/SVR_Dataset_Sync/` with the following structure:
+
+```
+dataset/SVR_Dataset_Sync/
+├── MulRan/                           # MulRan Dataset
+│   ├── DCC01/                        # Sequence name
+│   │   ├── DB/                       # Database (Street View Images)
+│   │   │   └── {frame_id}/           # Frame folder
+│   │   │       └── {frame_id}_Equi.png   # Equirectangular street view image
+│   │   ├── DB_Pos/                   # Database positions
+│   │   ├── Q/                        # Query (Range Images)
+│   │   │   └── {frame_id}.png        # Range image
+│   │   ├── Q_Pos/                    # Query positions
+│   │   └── Q_Range/                  # Query range data
+│   └── KAIST01/                      # Another sequence
+│
+├── ComplexUrbanDataset/              # Complex Urban Dataset
+│   ├── Urban01/
+│   ├── Urban02/
+│   ├── Urban13/
+│   └── Urban15/
+│
+├── HeLiPR/                           # HeLiPR Dataset
+│   ├── Bridge04/
+│   ├── Riverside06/
+│   ├── Roundabout01/
+│   └── Town01/
+│
+├── STheReo/                          # STheReo Dataset
+│   ├── SNU_Afternoon/
+│   └── Valley_Afternoon/
+│
+├── MA_LIO/                           # MA-LIO Dataset
+│   ├── City01/
+│   ├── City02/
+│   └── City03/
+│
+├── InHouse/                          # InHouse Custom Dataset
+│   ├── ComplexUrbanDataset/
+│   ├── Dunsan/
+│   ├── KAIST/
+│   ├── MulRan/
+│   ├── SVR_Test_MiniBatch.mat
+│   └── SVR_Train_MiniBatch.mat
+│
+├── MAT/                              # Precomputed MAT files for training/testing
+│   ├── SVR_Train.mat                 # Training data indices
+│   ├── SVR_Test_All.mat              # All test data
+│   ├── SVR_Test_ComplexUrban05.mat   # ComplexUrban test split
+│   ├── SVR_Test_ComplexUrban08.mat
+│   ├── SVR_Test_Dunsan.mat
+│   └── SVR_Test_Roundabout01.mat
+│
+└── Utils/                            # Utility scripts for data preparation
+    ├── streetviewImg_DWL_Main.py     # Street view image downloader
+    ├── streetviewImg_DWL_Inhouse.py  # Inhouse data downloader
+    ├── panorama_photo_date_average.py
+    └── MATLAB_API/                   # MATLAB utilities
+```
+
+### Data Format
+- **Street View Images (DB)**: Equirectangular panorama images (`*_Equi.png`)
+- **Range Images (Q)**: LiDAR range images projected as 2D images (`.png`)
+- **Position Files**: GPS/UTM coordinates for database and query frames
+- **MAT Files**: MATLAB format files containing training/testing indices and metadata
+
 ## Citation
 ```bibtex
 @article{lsv_loc_2025,
