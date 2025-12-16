@@ -157,7 +157,7 @@ except ImportError:
     print(f"Using command line arguments with expid: {args.expid}")
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc EVALUATION] Load Dataset
+# [LSV-Loc EVALUATION] Load Dataset
 # --------------------------------------------------------------------------------
 
 CONFIG = importlib.import_module(f"config.{args.expid}").CONFIG
@@ -187,7 +187,7 @@ with open(config_file_path, 'w') as f:
 print('===: TRAINING ===================================================================')
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc EVALUATION] Generate Embeddings
+# [LSV-Loc EVALUATION] Generate Embeddings
 # --------------------------------------------------------------------------------
 
 def get_lidar_image_embeddings(valid_loader, model):
@@ -209,7 +209,7 @@ def get_camera_image_embeddings(valid_loader, model):
     return torch.cat(valid_image_embeddings)
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc EVALUATION] Evaluation / PnP 
+# [LSV-Loc EVALUATION] Evaluation / PnP 
 # --------------------------------------------------------------------------------
 
 model_path = CONFIG.final_model_path
@@ -238,12 +238,12 @@ if os.path.exists(lidar_file) and os.path.exists(camera_file):
     camera_embeddings = torch.load(camera_file, map_location=CONFIG.device)
     print(f'Loaded embeddings: lidar {lidar_embeddings.shape}, camera {camera_embeddings.shape}')
 else:
-    # [SVR-LipLoc EVALUATION] Generate Embeddings
-    print('===: [SVR-LipLoc EVALUATION] Embedding GEN: LiDAR')
+    # [LSV-Loc EVALUATION] Generate Embeddings
+    print('===: [LSV-Loc EVALUATION] Embedding GEN: LiDAR')
     lidar_embeddings = get_lidar_image_embeddings(valid_loader, model)
     lidar_embeddings = lidar_embeddings.cuda()
 
-    print('===: [SVR-LipLoc EVALUATION] Embedding GEN: Camera')
+    print('===: [LSV-Loc EVALUATION] Embedding GEN: Camera')
     camera_embeddings = get_camera_image_embeddings(valid_loader, model)
     camera_embeddings = camera_embeddings.cuda()
     

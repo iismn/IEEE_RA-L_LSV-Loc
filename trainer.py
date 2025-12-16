@@ -26,7 +26,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader, DistributedSampler
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Argument Parser
+# [LSV-Loc TRAINING] Argument Parser
 # --------------------------------------------------------------------------------
 @dataclass
 class Args:
@@ -53,7 +53,7 @@ def init_wandb(rank):
         os.environ["WANDB_MODE"] = "disabled"
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Main Worker
+# [LSV-Loc TRAINING] Main Worker
 # --------------------------------------------------------------------------------
 
 def worker_init_fn(worker_id):
@@ -62,7 +62,7 @@ def worker_init_fn(worker_id):
 
 def main_worker(rank, world_size, CONFIG):
     # --------------------------------------------------------------------------------------
-    # [SVR-LipLoc TRAINING] DDP Initialization ---------------------------------------------
+    # [LSV-Loc TRAINING] DDP Initialization ---------------------------------------------
     # --------------------------------------------------------------------------------------
     os.environ['NCCL_BLOCKING_WAIT'] = '0'
     dist.init_process_group(
@@ -82,7 +82,7 @@ def main_worker(rank, world_size, CONFIG):
 
     if rank == 0:
         print('==================================================================================')
-        print('===================== SVR-Loc: Range Image-based Localization ====================')
+        print('=========== LSV-Loc: LiDAR to StreeetView Cross-Modal Localization ===============')
         print('==================================================================================\n')
 
         print('===: CONFIG =====================================================================')
@@ -105,7 +105,7 @@ def main_worker(rank, world_size, CONFIG):
         print('===: TRAINING ===================================================================')
     
     # --------------------------------------------------------------------------------------
-    # [SVR-LipLoc TRAINING] Data Loader (DDP) ----------------------------------------------
+    # [LSV-Loc TRAINING] Data Loader (DDP) ----------------------------------------------
     # --------------------------------------------------------------------------------------
     train_dataset = get_dataset(mode=CONFIG.train_dataset, CONFIG=CONFIG)
     valid_dataset = get_dataset(mode=CONFIG.val_dataset, CONFIG=CONFIG)
@@ -145,7 +145,7 @@ def main_worker(rank, world_size, CONFIG):
     )
  
     # --------------------------------------------------------------------------------------
-    # [SVR-LipLoc TRAINING] Model To Device ------------------------------------------------
+    # [LSV-Loc TRAINING] Model To Device ------------------------------------------------
     # --------------------------------------------------------------------------------------
     model = importlib.import_module(f"utility.Backbone.{CONFIG.model}").Model(CONFIG)
     
@@ -155,9 +155,9 @@ def main_worker(rank, world_size, CONFIG):
         elif CONFIG.resume_config == "final":
             model_path = CONFIG.final_resume_model_path
         else:
-            raise ValueError(f"===: [SVR-LipLoc] Invalid resume_config: {CONFIG.resume_config}")
+            raise ValueError(f"===: [LSV-Loc] Invalid resume_config: {CONFIG.resume_config}")
         model.load_state_dict(torch.load(model_path, map_location=CONFIG.device))
-        print(f"===: [SVR-LipLoc] Model Loaded from {model_path}")
+        print(f"===: [LSV-Loc] Model Loaded from {model_path}")
     
     model.to(CONFIG.device)
     model = torch.nn.parallel.DistributedDataParallel(
@@ -168,7 +168,7 @@ def main_worker(rank, world_size, CONFIG):
     )
     
     # --------------------------------------------------------------------------------------
-    # [SVR-LipLoc TRAINING] Optimizer & LR Scheduler ---------------------------------------
+    # [LSV-Loc TRAINING] Optimizer & LR Scheduler ---------------------------------------
     # --------------------------------------------------------------------------------------
     encoder_params = list(model.module.encoder.parameters())
     if CONFIG.pooling_fuse:
@@ -191,14 +191,14 @@ def main_worker(rank, world_size, CONFIG):
     step = "epoch"
     
     # --------------------------------------------------------------------------------------
-    # [SVR-LipLoc TRAINING] Wandb / Writer Setting -----------------------------------------
+    # [LSV-Loc TRAINING] Wandb / Writer Setting -----------------------------------------
     # --------------------------------------------------------------------------------------
     writer = None
     if rank == 0:
         writer = SummaryWriter(log_dir=CONFIG.logdir)
     
     # --------------------------------------------------------------------------------------
-    # [SVR-LipLoc TRAINING] Training Loop --------------------------------------------------
+    # [LSV-Loc TRAINING] Training Loop --------------------------------------------------
     # --------------------------------------------------------------------------------------
     best_loss = float('inf')
     for epoch in range(CONFIG.epochs):
@@ -217,7 +217,7 @@ def main_worker(rank, world_size, CONFIG):
             valid_loss = networkTool.valid_epoch(model, valid_loader, rank, writer, CONFIG=CONFIG)
         
         if rank == 0:
-            print(f"\033[38;5;208m===: [SVR-LipLoc TRAINING] Epoch: {epoch} | Train Loss: {train_loss.avg} | Valid Loss: {valid_loss.avg}\033[0m")
+            print(f"\033[38;5;208m===: [LSV-Loc TRAINING] Epoch: {epoch} | Train Loss: {train_loss.avg} | Valid Loss: {valid_loss.avg}\033[0m")
             writer.add_scalar("Loss/Train", train_loss.avg, epoch)
             writer.add_scalar("Loss/Valid", valid_loss.avg, epoch)
             
@@ -226,7 +226,7 @@ def main_worker(rank, world_size, CONFIG):
             
             if (epoch + 1) % 1 == 0:
                 if rank == 0:
-                    print("===: [SVR-LipLoc EVALUATION] Recall Calculation")
+                    print("===: [LSV-Loc EVALUATION] Recall Calculation")
                     model.eval()
                     with torch.no_grad():
                         recall_dict = networkTool.valid_recall(model, valid_mini_dataset, recall_loader, rank, writer, epoch, CONFIG=CONFIG)
@@ -236,7 +236,7 @@ def main_worker(rank, world_size, CONFIG):
                         if recall_dict["Recall@20"] > best_recall:
                             best_recall = recall_dict["Recall@20"]
                             torch.save(model.module.state_dict(), CONFIG.best_model_path)
-                            print(f"===: [SVR-LipLoc EVALUATION] Improved Recall@20: {best_recall:.4f} - Best Model Saved (Recall)")
+                            print(f"===: [LSV-Loc EVALUATION] Improved Recall@20: {best_recall:.4f} - Best Model Saved (Recall)")
                         
                     
         dist.barrier()

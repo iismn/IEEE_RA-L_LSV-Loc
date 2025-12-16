@@ -14,7 +14,7 @@ from torch.utils.data import DistributedSampler
 import tifffile
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Database Struct Parser
+# [LSV-Loc TRAINING] Database Struct Parser
 # --------------------------------------------------------------------------------
 
 root_dir = '/home/iris/Workspace/Sangmin/SVR_Loc/dataset/SVR_Dataset_Sync/'
@@ -28,7 +28,7 @@ dbStruct = namedtuple('dbStruct', ['whichSet', 'dataset',
     'posDistThr', 'posQ', 'posDb','posDistSqThr', 'nonTrivPosDistSqThr'])
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Database Struct Parser
+# [LSV-Loc TRAINING] Database Struct Parser
 # --------------------------------------------------------------------------------
 
 def parse_dbStruct(path):
@@ -108,7 +108,7 @@ def get_dataset(mode, CONFIG):
     return dataset
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] CILP Dataset
+# [LSV-Loc TRAINING] CILP Dataset
 # --------------------------------------------------------------------------------
 
 class CILPDataset_STRV_wPos(torch.utils.data.Dataset):

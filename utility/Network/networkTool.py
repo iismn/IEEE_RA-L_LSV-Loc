@@ -18,7 +18,7 @@ from torch.cuda.amp import autocast
 from torch.utils.data import Sampler
 from torch.utils.data import SubsetRandomSampler, DataLoader
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Utility Functions
+# [LSV-Loc TRAINING] Utility Functions
 # --------------------------------------------------------------------------------
 iteration = 0
 iteration_val = 0
@@ -56,7 +56,7 @@ def cross_entropy(preds, targets, reduction='none'):
         return loss.mean()
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc EVALUATION] Generate Embeddings
+# [LSV-Loc EVALUATION] Generate Embeddings
 # --------------------------------------------------------------------------------
 
 def lidar_image_embeddings(valid_loader, model):
@@ -78,7 +78,7 @@ def camera_image_embeddings(valid_loader, model):
     return torch.cat(valid_image_embeddings)
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] T-InfoNCE Loss
+# [LSV-Loc TRAINING] T-InfoNCE Loss
 # --------------------------------------------------------------------------------
 
 def partial_detach_gather_utm(local_utm: torch.Tensor) -> torch.Tensor:
@@ -172,7 +172,7 @@ def train_step_BCL(model, batch, temperature: float = 0.07):
     return loss
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] T-InfoNCE + EPro-PnP Loss
+# [LSV-Loc TRAINING] T-InfoNCE + EPro-PnP Loss
 # --------------------------------------------------------------------------------
 
 def train_step_PnP(model, batch, temperature: float = 0.07):
@@ -192,14 +192,14 @@ def train_step_PnP(model, batch, temperature: float = 0.07):
 
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Validation Functions
+# [LSV-Loc TRAINING] Validation Functions
 # --------------------------------------------------------------------------------
 
 def valid_epoch(model, valid_loader, rank, writer, CONFIG):
     global iteration_val
     
     loss_meter = AvgMeter()
-    tqdm_object = tqdm(valid_loader, total=len(valid_loader), desc="\033[92m===: [SVR-LipLoc TRAINING] VALID: Iteration \033[0m", position=0, leave=True, disable=rank != 0)
+    tqdm_object = tqdm(valid_loader, total=len(valid_loader), desc="\033[92m===: [LSV-Loc TRAINING] VALID: Iteration \033[0m", position=0, leave=True, disable=rank != 0)
     for batch in tqdm_object:
         batch = {k: v.to(CONFIG.device) for k, v in batch.items()}
         loss = model(batch)
@@ -215,20 +215,20 @@ def valid_epoch(model, valid_loader, rank, writer, CONFIG):
 
 def valid_recall(model, valid_dataset, valid_loader, rank, writer, epoch, CONFIG):
     
-    # [SVR-LipLoc EVALUATION] Generate Embeddings
-    print('===: [SVR-LipLoc EVALUATION] Embedding GEN: LiDAR')
+    # [LSV-Loc EVALUATION] Generate Embeddings
+    print('===: [LSV-Loc EVALUATION] Embedding GEN: LiDAR')
     lidar_embeddings = lidar_image_embeddings(valid_loader, model)
     lidar_embeddings = lidar_embeddings.cuda()  
 
-    print('===: [SVR-LipLoc EVALUATION] Embedding GEN: Camera')
+    print('===: [LSV-Loc EVALUATION] Embedding GEN: Camera')
     camera_embeddings = camera_image_embeddings(valid_loader, model)
     camera_embeddings = camera_embeddings.cuda()
     
-    print('===: [SVR-LipLoc EVALUATION] Pose GEN')
+    print('===: [LSV-Loc EVALUATION] Pose GEN')
     num_matches = 0
     total_queries = valid_dataset.dbStruct.numQ
 
-    print('\033[92m===: [SVR-LipLoc EVALUATION] Evaluation START\033[0m')
+    print('\033[92m===: [LSV-Loc EVALUATION] Evaluation START\033[0m')
     recall_Idx = [1,5,10,15,20]
     query_predict = []
     recall_results = {k: 0 for k in recall_Idx}
@@ -265,7 +265,7 @@ def valid_recall(model, valid_dataset, valid_loader, rank, writer, epoch, CONFIG
     
     for k in recall_Idx:
         recall = recall_results[k] / total_queries
-        print(f'===: [SVR-LipLoc EVALUATION] Recall@{k}: {recall*100:.2f}%')
+        print(f'===: [LSV-Loc EVALUATION] Recall@{k}: {recall*100:.2f}%')
         if rank == 0:
             writer.add_scalar(f"Recall/{k}", recall * 100, epoch)
         recall_dict[f'Recall@{k}'] = recall * 100
@@ -273,14 +273,14 @@ def valid_recall(model, valid_dataset, valid_loader, rank, writer, epoch, CONFIG
     return recall_dict
         
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Training Functions
+# [LSV-Loc TRAINING] Training Functions
 # --------------------------------------------------------------------------------
 
 def train_epoch(model, train_loader, optimizer, lr_scheduler, step, rank, writer, CONFIG, scaler=None):
     global iteration
     
     loss_meter = AvgMeter()
-    tqdm_object = tqdm(train_loader, total=len(train_loader), desc=f"\033[92m===: [SVR-LipLoc TRAINING] TRAIN: Iteration \033[0m", position=0, leave=True, disable=rank != 0)
+    tqdm_object = tqdm(train_loader, total=len(train_loader), desc=f"\033[92m===: [LSV-Loc TRAINING] TRAIN: Iteration \033[0m", position=0, leave=True, disable=rank != 0)
     
     for batch in tqdm_object:
 
@@ -290,7 +290,7 @@ def train_epoch(model, train_loader, optimizer, lr_scheduler, step, rank, writer
                 if CONFIG.loss == "BCL":
                     loss = train_step_BCL(model, batch, temperature=CONFIG.temperature)
                 else:
-                    raise ValueError("===: [SVR-LipLoc TRAINING] Invalid Loss Function")
+                    raise ValueError("===: [LSV-Loc TRAINING] Invalid Loss Function")
 
             scaler.scale(loss).backward()
             scaler.step(optimizer)
@@ -309,7 +309,7 @@ def train_epoch(model, train_loader, optimizer, lr_scheduler, step, rank, writer
             if CONFIG.loss == "BCL":
                 loss = train_step_BCL(model, batch, temperature=CONFIG.temperature)
             else:
-                raise ValueError("===: [SVR-LipLoc TRAINING] Invalid Loss Function")
+                raise ValueError("===: [LSV-Loc TRAINING] Invalid Loss Function")
         
             optimizer.zero_grad()
             loss.backward()

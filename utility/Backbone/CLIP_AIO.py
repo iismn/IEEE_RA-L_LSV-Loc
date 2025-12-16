@@ -15,7 +15,7 @@ from sklearn.neighbors import NearestNeighbors
 from .match_SEA_lite import Matchformer_SEA_lite
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Input Transforms
+# [LSV-Loc TRAINING] Input Transforms
 # --------------------------------------------------------------------------------
 
 def convert_uniform_to_nonuniform_lidar(image, p=2.0, **kwargs):
@@ -174,7 +174,7 @@ def input_transforms_dynamic_LiDAR(mode, size, current_epoch, max_epoch=50):
     gamma_prob = lin_schedule(0.1, 0.8, current_epoch, max_epoch)
     noise_prob = lin_schedule(0.1, 0.8, current_epoch, max_epoch)
     
-    print(f'===: [SVR-LipLoc TRAINING] Dynamic Augmentation Probabilities : {brightness_contrast_prob:.2f}, {gamma_prob:.2f}, {noise_prob:.2f}')
+    print(f'===: [LSV-Loc TRAINING] Dynamic Augmentation Probabilities : {brightness_contrast_prob:.2f}, {gamma_prob:.2f}, {noise_prob:.2f}')
     
     if mode == "train":
         return A.Compose([
@@ -215,7 +215,7 @@ def input_transforms_dynamic_SVR(mode, size, current_epoch, max_epoch=50):
         ])
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Sinkhorn Algorithm
+# [LSV-Loc TRAINING] Sinkhorn Algorithm
 # --------------------------------------------------------------------------------
 
 def log_otp_solver(log_a, log_b, M, num_iters: int = 20, reg: float = 1.0) -> torch.Tensor:
@@ -266,7 +266,7 @@ def get_matching_probs(S, dustbin_score = 1.0, num_iters=3, reg=1.0):
     return log_P - norm
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc TRAINING] Image Encoders
+# [LSV-Loc TRAINING] Image Encoders
 # --------------------------------------------------------------------------------
 
 class ImageEncoder(nn.Module):
@@ -291,7 +291,7 @@ class ImageEncoder(nn.Module):
                 state_dict = ckpt.get("state_dict", ckpt)
                 self.encoder.load_state_dict(state_dict, strict=False)
                 
-                print("=====: [SVR-LipLoc INFO] Using Matchformer SEA Lite ===")
+                print("=====: [LSV-Loc INFO] Using Matchformer SEA Lite ===")
             else:
                 raise ValueError(f"Unknown model_hub: {self.model_hub}")
 
@@ -301,11 +301,11 @@ class ImageEncoder(nn.Module):
         self.patch_size = 14
         
         if not trainable:
-            print("===: [SVR-LipLoc INFO] Freezing Image Encoder ===")
+            print("===: [LSV-Loc INFO] Freezing Image Encoder ===")
             for p in self.encoder.parameters():
                 p.requires_grad = False
         else:
-            print("===: [SVR-LipLoc INFO] Training Image Encoder ===")
+            print("===: [LSV-Loc INFO] Training Image Encoder ===")
             for p in self.encoder.parameters():
                 p.requires_grad = True
 
@@ -339,7 +339,7 @@ class ImageEncoder(nn.Module):
         return y2
 
 # --------------------------------------------------------------------------------------
-# [SVR-LipLoc Pooling] -----------------------------------------------------------------
+# [LSV-Loc Pooling] -----------------------------------------------------------------
 # --------------------------------------------------------------------------------------
 
 class ProjectionBlock(nn.Module):
@@ -374,7 +374,7 @@ class ProjectionHead(nn.Module):
         return x
 
 # --------------------------------------------------------------------------------------
-# [SVR-LipLoc Model] -------------------------------------------------------------------
+# [LSV-Loc Model] -------------------------------------------------------------------
 # --------------------------------------------------------------------------------------
 
 class Model(nn.Module):
@@ -391,14 +391,14 @@ class Model(nn.Module):
         self.transforms_dict = {"camera": self.camera_transform,"lidar": self.lidar_transform}
         
         # -----------------------------------------
-        # [SVR-LipLoc TRAINING] Encoder Initialization
+        # [LSV-Loc TRAINING] Encoder Initialization
         # -----------------------------------------
         self.encoder = ImageEncoder(model_name=CONFIG.model_name, pretrained=CONFIG.pretrained, trainable=CONFIG.trainable, 
                                             embed_dim=CONFIG.embedding_dim, project_dim=CONFIG.projection_dim, 
                                             model_hub=CONFIG.model_hub, transforms_dict=self.transforms_dict)
                     
         # -----------------------------------------
-        # [SVR-LipLoc TRAINING] PRJ Head Initialization
+        # [LSV-Loc TRAINING] PRJ Head Initialization
         # -----------------------------------------
         if self.pooling_fuse == True:
             self.projection_fuse = ProjectionHead(projection_dim=CONFIG.projection_dim, final_embedding_dim=CONFIG.final_embedding_dim, dropout=CONFIG.dropout, num_projection_layer=CONFIG.num_projection_layer)

@@ -22,14 +22,14 @@ class Args:
 args = tyro.cli(Args)
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc EVALUATION] Load Dataset
+# [LSV-Loc EVALUATION] Load Dataset
 # --------------------------------------------------------------------------------
 
 CONFIG = importlib.import_module(f"config.{args.expid}").CONFIG
 get_dataset = importlib.import_module(f"utility.Database.{CONFIG.dataloader}").get_dataset
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc EVALUATION] Generate Embeddings
+# [LSV-Loc EVALUATION] Generate Embeddings
 # --------------------------------------------------------------------------------
 
 def get_lidar_image_embeddings(valid_loader, model):
@@ -51,7 +51,7 @@ def get_camera_image_embeddings(valid_loader, model):
     return torch.cat(valid_image_embeddings)
 
 # --------------------------------------------------------------------------------
-# [SVR-LipLoc EVALUATION] Evaluation
+# [LSV-Loc EVALUATION] Evaluation
 # --------------------------------------------------------------------------------
 
 def main():
@@ -83,20 +83,20 @@ def main():
                               num_workers=CONFIG.num_workers,
                               shuffle=CONFIG.test_shuffle)
     
-    # [SVR-LipLoc EVALUATION] Generate Embeddings
-    print('===: [SVR-LipLoc EVALUATION] Embedding GEN: LiDAR')
+    # [LSV-Loc EVALUATION] Generate Embeddings
+    print('===: [LSV-Loc EVALUATION] Embedding GEN: LiDAR')
     lidar_embeddings = get_lidar_image_embeddings(valid_loader, model)
     lidar_embeddings = lidar_embeddings.cuda()
 
-    print('===: [SVR-LipLoc EVALUATION] Embedding GEN: Camera')
+    print('===: [LSV-Loc EVALUATION] Embedding GEN: Camera')
     camera_embeddings = get_camera_image_embeddings(valid_loader, model)
     camera_embeddings = camera_embeddings.cuda()
 
-    print('===: [SVR-LipLoc EVALUATION] Pose GEN')
+    print('===: [LSV-Loc EVALUATION] Pose GEN')
     num_matches = 0
     total_queries = valid_dataset.dbStruct.numQ
 
-    print('\033[92m===: [SVR-LipLoc EVALUATION] Evaluation START\033[0m')
+    print('\033[92m===: [LSV-Loc EVALUATION] Evaluation START\033[0m')
     
     recall_Idx = [1,5,10,15,20]
     query_predict = []
@@ -149,7 +149,7 @@ def main():
     # Calculate and print recall for each k
     for k in recall_Idx:
         recall = recall_results[k] / total_queries
-        print(f'===: [SVR-LipLoc EVALUATION] Recall@{k}: {recall*100:.2f}%')
+        print(f'===: [LSV-Loc EVALUATION] Recall@{k}: {recall*100:.2f}%')
     
     # Save query_predict results to a file
     query_predict_df = pd.DataFrame(query_predict)
@@ -171,7 +171,7 @@ def main():
 
     recall_df.to_csv(recall_output_file, index=False)
     
-    print(f"===: [SVR-LipLoc EVALUATION] Saved Predictions / Recall : {output_file} / {recall_output_file}")
+    print(f"===: [LSV-Loc EVALUATION] Saved Predictions / Recall : {output_file} / {recall_output_file}")
     
 if __name__ == "__main__":
     main()

@@ -36,8 +36,8 @@ class CONFIG:
     
     # MODEL CONFIG 
     model = "CLIP_AIO"
-    model_hub = 'custom'                         # 'torch' / 'huggingface' / 'timm' / 'custom'
-    model_name = 'match_SEA_lite'            # 'dinov2_vitb14_reg' / 'vit_base_patch14_reg4_dinov2.lvd142m' / 'match_SEA_lite'
+    model_hub = 'torch'                         # 'torch' / 'huggingface' / 'timm' / 'custom'
+    model_name = 'dinov2_vitb14_reg'            # 'dinov2_vitb14_reg' / 'vit_base_patch14_reg4_dinov2.lvd142m' / 'match_SEA_lite'
     
     trainable = True
     trainable_blocks = 0
