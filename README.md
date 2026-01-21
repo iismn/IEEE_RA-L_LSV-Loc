@@ -189,12 +189,16 @@ dataset/SVR_Dataset_Sync/
 
 ## Citation
 ```bibtex
-@article{lsv_loc_2025,
-  title={LSV-Loc: LiDAR to Street View Image Crossmodal Localization},
-  author={Sangmin Lee},
-  journal={IEEE Robotics and Automation Letters (RA-L)},
-  year={2025}
-}
+@ARTICLE{LSVLoc,
+  author={Lee, Sangmin and Choi, Donghyun and Ryu, Jee-Hwan},
+  journal={IEEE Robotics and Automation Letters}, 
+  title={LSV-Loc: LiDAR to StreetView Image Cross-Modal Localization}, 
+  year={2026},
+  volume={11},
+  number={3},
+  pages={2514-2521},
+  keywords={Location awareness;Laser radar;Sensors;Feature extraction;Global Positioning System;Accuracy;Transformers;Image recognition;Cameras;Semantics;Localization;autonomous vehicle navigation;place recognition},
+  doi={10.1109/LRA.2026.3653282}}
 ```
 
 ## License
